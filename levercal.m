@@ -1,6 +1,7 @@
+% calculate lever velocity from a video of lever pulling without sample
 function disp = levercal(scale)
 
-[filename, pathname] = uigetfile({'*.avi;','All Image Files';...
+[filename, pathname] = uigetfile({'*.avi;','All Image Files';... % choose lever calibration video
           '*.*','All Files' },'mytitle');
 vidObj = VideoReader(filename); 
 vidHeight = vidObj.Height;
@@ -26,9 +27,9 @@ points = ginput(1);
 pointImage = insertMarker(objectFrame,points,'+','Color','white');
 figure; imshow(pointImage);
 
-tracker = vision.PointTracker('MaxBidirectionalError',1);
+tracker = vision.PointTracker('MaxBidirectionalError',1); % click on tip of lever
 initialize(tracker,points,objectFrame);
-initialpos = points(1,2);
+initialpos = points(1,2); 
 
 disp(1) = points(1,2) - initialpos;
 

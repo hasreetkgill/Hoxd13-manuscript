@@ -3,28 +3,29 @@
 % adapted from nanstron_gut_compress by nandan nerurkar
 
 % set scale (mm per pixel)
-% choice = questdlg('set scale?');
-% switch choice
-%     case 'Yes'
-%         msgbox('choose scale photo');
-%         [filename, pathname] = uigetfile({'*.jpg;*.tif;*.png;*.gif;*.lsm','All Image Files';...
-%           '*.*','All Files' },'mytitle');
-%         cd(pathname);
-%         im = imread(filename);
-%         figure, imshow(im);
-%         h = imdistline;
-%         pause
-%         scale = 1/(getDistance(h)); 
-%     case 'No'
-%         scale = inputdlg('enter number of pixels per mm');
-%         scale = 1/(str2num(scale{1}));      
-% end
-clear
-npix = 207; % 10.0=526 8.0=426, 6.3=326
+choice = questdlg('set scale?');
+switch choice
+     case 'Yes'
+         msgbox('choose scale photo'); % use photo of ruler taken at mag corresponding to test videos
+        [filename, pathname] = uigetfile({'*.jpg;*.tif;*.png;*.gif;*.lsm','All Image Files';...
+           '*.*','All Files' },'mytitle');
+        cd(pathname);
+        im = imread(filename);
+        figure, imshow(im);
+        h = imdistline; % draw line that measures 1 mm
+        pause
+        scale = 1/(getDistance(h)); 
+    case 'No'
+        scale = inputdlg('enter number of pixels per mm');
+        scale = 1/(str2num(scale{1}));      
+end
+
+% use the following if not measuring scale from an image
+npix = 207; % known pixels/mm for relevant magnifications: 10.0=526 8.0=426, 6.3=326
 scale = 1/npix;
 
 % set constants
-% determine lever velocity from calibration video
+% determine lever velocity from calibration video (lever moving alone without sample)
 choice = questdlg('set step size?');
 switch choice
     case 'Yes'
@@ -39,47 +40,46 @@ switch choice
 end
 
 
-% stepsize = 0.0133;
+% if not calculating stepsize, enter manually
+stepsize = 0.0133;
+
+% other constants
 E = 4.1e11; % elastic modulus of tungsten (Pa)
 r = 0.10/2; % radius of lever (mm)
-% e14.5 mgfp hg - endmes = 0.05/2; mesmus, whole = 0.1/2; 
-% e14.5 mgfp mg = 0.05/2 
-
 I = (pi*(r.^4))/4; % formula for area moment of inertia of of a circle (mm^4)
 L = 43; % length of lever (mm)
-% e14.5 mgfp hg - endmes = 45; mesmus, whole = ?; 
-% e14.5 mgfp mg = 45
-
 kb = (3*E*I)/(L.^3); % Bending stiffness of the rod = 3EI/L^3 (Pa*mm)
 ri = 0.068; % inner radius (whole tube) - e8 hind = 0.041, e8 fore = 0.068
 ro = 0.128; % outer radius (whole tube) - e8 hind = 0.146, e8 fore = 0.128
-% l = 0.22;
-% msgbox('measure tissue width')
-% [filename, pathname] = uigetfile({'*.jpg;*.tif;*.png;*.gif;*.lsm','All Image Files';...
-%   '*.*','All Files' },'mytitle');
-% im2 = imread(filename);
-% figure, imshow(im2);
-% w1 = imdistline;
-% w2 = imdistline;
-% pause
-% w1 = round(getDistance(w1));
-% w2 = round(getDistance(w2));
-% w = mean([w1,w2]);
-% scale2 = 0.13495/512;
-% w = (w*scale2); % Width of one arm of tissue ring (mm)
+l = 0.22; % tissue ring thickness (long axis)
 
-% w = 0.02; 
-% e17 - 0.16; 
-% e14.5 mgfp hg - endmes = 0.15; mesmus = 0.25; whole = 0.29 
-% e14.5 mgfp mg - end = 0.015; endmes = 0.08
+% measure tissue width from transverse section images - take two measurements
+msgbox('measure tissue width')
+[filename, pathname] = uigetfile({'*.jpg;*.tif;*.png;*.gif;*.lsm','All Image Files';...
+  '*.*','All Files' },'mytitle');
+im2 = imread(filename);
+figure, imshow(im2);
+w1 = imdistline;
+w2 = imdistline;
+pause
+w1 = round(getDistance(w1));
+w2 = round(getDistance(w2));
+w = mean([w1,w2]);
+scale2 = 0.13495/512; % scale of transverse section image pixels/mm
+w = (w*scale2); % Width of one arm of tissue ring (mm)
+
+% if not measuring tissue width, enter manually
+w = 0.02;
 
 % perform tensile test
+
+% if analyzing multiple videos
 % nvids = inputdlg('how many videos to analyze?');
 % nvids = str2num(nvids{1});
+% [name, datastruct] = tensiletest(scale, stepsize, l, kb, w, nvids); % multiple videos
 
-%[name, datastruct] = tensiletest(scale, stepsize, l, kb, w, nvids);
-% [name, datastruct] = tensiletest(scale, stepsize, l, kb, w);
-[name, datastruct] = tensiletest(scale, stepsize, kb, ri, ro);
+% one video
+[name, datastruct] = tensiletest(scale, stepsize, l, kb, w); % one video
 % save(['datastruct_',name,'.mat'],'datastruct')
 
 %% calculate elastic moduli
@@ -100,7 +100,7 @@ ro = 0.128; % outer radius (whole tube) - e8 hind = 0.146, e8 fore = 0.128
 % 
 % %%%%%%
 
-% stravg = 0.2;
+stravg = 0.2; % average strain used to calculate elastic modulus
 
 % plot and save results
 close all
@@ -138,7 +138,7 @@ figure,
 % xlabel('average strain')
 xlabel('time')
 ylabel('stress (Pa)')
-% legend('1','2','3','4','5','6','7','8')
+% legend('1','2','3','4','5','6','7','8') % multiple videos
 saveas(gcf,[name, '_stressvtime.png'])
 
 % titles = {'young modulus';'shear modulus'};

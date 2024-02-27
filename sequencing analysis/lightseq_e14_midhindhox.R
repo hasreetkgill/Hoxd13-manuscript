@@ -1,3 +1,5 @@
+# Code for analysis of read count data from Light-seq
+# Though 3 layers were sequenced (inner mesenchyme, muscularis mucosa, and inner circular muscle), only inner mesenchyme results were reported in the manuscript
 # Load libraries
 library("DESeq2")
 library("pheatmap")

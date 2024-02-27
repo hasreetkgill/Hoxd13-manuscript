@@ -1,21 +1,6 @@
-% function [name, datastruct] = tensiletest(scale, stepsize, l, kb, w)
-function [name, datastruct] = tensiletest(scale, stepsize, kb, ri, ro)
-% for j = 1:nvids
+function [name, datastruct] = tensiletest(scale, stepsize, l, kb, w)
+% for j = 1:nvids % multiple videos
     clearvars -except scale stepsize l kb ri ro w name datastruct j %nvids 
-
-% for stress relaxation  
-    [filename, pathname] = uigetfile({'*.tif;','All Image Files';...
-              '*.*','All Files' },'mytitle');
-    figure; imshow(filename)
-    [inpoints(:,1),inpoints(:,2)] = getpts;
-    initialpos = inpoints(7,2);
-    disp(1) = inpoints(7,2) - initialpos;
-    dist(1,1) = sqrt((inpoints(2,1)-inpoints(1,1))^2+(inpoints(2,2)-inpoints(1,2))^2);
-    dist(2,1) = sqrt((inpoints(4,1)-inpoints(3,1))^2+(inpoints(4,2)-inpoints(3,2))^2);
-    dist(3,1) = sqrt((inpoints(6,1)-inpoints(5,1))^2+(inpoints(6,2)-inpoints(5,2))^2);
-
-     close all
-%%%%%%%%%%%%%%%%%%%%%%
 
     [filename, pathname] = uigetfile({'*.avi;','All Image Files';...
               '*.*','All Files' },'mytitle');
@@ -73,10 +58,6 @@ function [name, datastruct] = tensiletest(scale, stepsize, kb, ri, ro)
       i = i+1;
     end
 
-    % for stress relaxation
-    applied = (stepsize*30) + zeros(framenum,1);
-
-    %%%%%%%%%%%%%%%
 %     applied(1) = 0;
 %     for i =2:framenum;
 %         applied(i)=applied(i-1)+stepsize;
